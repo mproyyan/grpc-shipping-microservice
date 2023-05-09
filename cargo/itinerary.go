@@ -38,6 +38,34 @@ type Itinerary struct {
 	Legs []Leg `json:"legs"`
 }
 
+// InitialDepartureLocation returns the start of the itinerary.
+func (i Itinerary) InitialDepartureLocation() location.UNLocode {
+	if i.IsEmpty() {
+		return location.UNLocode("")
+	}
+
+	return i.Legs[0].LoadLocation
+}
+
+// FinalArrivalLocation returns the end of the itinerary.
+func (i Itinerary) FinalArrivalLocation() location.UNLocode {
+	if i.IsEmpty() {
+		return location.UNLocode("")
+	}
+
+	return i.Legs[len(i.Legs)-1].UnloadLocation
+}
+
+// FinalArrivalTime returns the expected arrival time at final destination.
+func (i Itinerary) FinalArrivalTime() time.Time {
+	return i.Legs[len(i.Legs)-1].UnloadTime
+}
+
+// IsEmpty checks if the itinerary contains at least one leg.
+func (i Itinerary) IsEmpty() bool {
+	return i.Legs == nil || len(i.Legs) == 0
+}
+
 type ItineraryRepositoryContract interface {
 	Upsert(ctx context.Context, dbtx db.DBTX, itinerary Itinerary) (Itinerary, error)
 	Find(ctx context.Context, dbtx db.DBTX, id int64) (Itinerary, error)

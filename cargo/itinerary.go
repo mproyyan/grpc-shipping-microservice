@@ -66,6 +66,37 @@ func (i Itinerary) IsEmpty() bool {
 	return i.Legs == nil || len(i.Legs) == 0
 }
 
+// IsExpected checks if the given handling event is expected when executing
+// this itinerary.
+func (i Itinerary) IsExpected(event HandlingEvent) bool {
+	if i.IsEmpty() {
+		return true
+	}
+
+	switch event.Activity.Type {
+	case Receive:
+		return i.InitialDepartureLocation() == event.Activity.Location
+	case Load:
+		for _, l := range i.Legs {
+			if l.LoadLocation == event.Activity.Location && l.VoyageNumber == event.Activity.VoyageNumber {
+				return true
+			}
+		}
+		return false
+	case Unload:
+		for _, l := range i.Legs {
+			if l.UnloadLocation == event.Activity.Location && l.VoyageNumber == event.Activity.VoyageNumber {
+				return true
+			}
+		}
+		return false
+	case Claim:
+		return i.FinalArrivalLocation() == event.Activity.Location
+	}
+
+	return true
+}
+
 type ItineraryRepositoryContract interface {
 	Upsert(ctx context.Context, dbtx db.DBTX, itinerary Itinerary) (Itinerary, error)
 	Find(ctx context.Context, dbtx db.DBTX, id int64) (Itinerary, error)

@@ -19,8 +19,7 @@ type HandlingActivity struct {
 // HandlingEvent is used to register the event when, for instance, a cargo is
 // unloaded from a carrier at a some location at a given time.
 type HandlingEvent struct {
-	// TODO: change TrackingID type to cargo.TrackingID
-	TrackingID string
+	TrackingID TrackingID
 	Activity   HandlingActivity
 }
 

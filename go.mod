@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/lib/pq v1.10.9
+	github.com/pborman/uuid v1.2.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.1
 )
@@ -11,6 +12,7 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/google/uuid v1.1.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect

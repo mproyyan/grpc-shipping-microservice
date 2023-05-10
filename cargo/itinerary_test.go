@@ -75,3 +75,9 @@ func TestFindItinerary(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, newIt)
 }
+
+func TestFindItineraryNotFound(t *testing.T) {
+	newIt, err := itineraryTest.Find(context.Background(), dbTest, 99999)
+	require.NoError(t, err)
+	require.Empty(t, newIt)
+}

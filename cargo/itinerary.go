@@ -105,17 +105,31 @@ type ItineraryRepositoryContract interface {
 type ItineraryRepository struct {
 }
 
+type itineraryResult struct {
+	id   int64
+	legs string
+}
+
+func (ir itineraryResult) build() (Itinerary, error) {
+	legs := []Leg{{}}
+	err := json.Unmarshal([]byte(ir.legs), &legs)
+	if err != nil {
+		return Itinerary{}, err
+	}
+
+	return Itinerary{
+		ID:   ir.id,
+		Legs: legs,
+	}, nil
+}
+
 func (ir ItineraryRepository) Upsert(ctx context.Context, dbtx db.DBTX, itinerary Itinerary) (Itinerary, error) {
 	b, err := json.Marshal(itinerary.Legs)
 	if err != nil {
 		return Itinerary{}, err
 	}
 
-	var result struct {
-		id   int64
-		legs string
-	}
-
+	var result itineraryResult
 	var row *sql.Row
 	if itinerary.ID == 0 {
 		query := "INSERT INTO itineraries (legs) VALUES($1) RETURNING id, legs"
@@ -125,61 +139,31 @@ func (ir ItineraryRepository) Upsert(ctx context.Context, dbtx db.DBTX, itinerar
 		row = dbtx.QueryRowContext(ctx, query, itinerary.ID, string(b))
 	}
 
-	err = row.Scan(
-		&result.id,
-		&result.legs,
-	)
-
+	err = row.Scan(&result.id, &result.legs)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return Itinerary{}, nil
+		}
+
 		return Itinerary{}, err
 	}
 
-	legs, err := buildLegs([]byte(result.legs))
-	if err != nil {
-		return Itinerary{}, err
-	}
-
-	return Itinerary{
-		ID:   result.id,
-		Legs: legs,
-	}, nil
+	return result.build()
 }
 
 func (ir ItineraryRepository) Find(ctx context.Context, dbtx db.DBTX, id int64) (Itinerary, error) {
 	query := "SELECT id, legs FROM itineraries WHERE id = $1 LIMIT 1"
 	row := dbtx.QueryRowContext(ctx, query, id)
 
-	var result struct {
-		id   int64
-		legs string
-	}
-
-	err := row.Scan(
-		&result.id,
-		&result.legs,
-	)
-
+	var result itineraryResult
+	err := row.Scan(&result.id, &result.legs)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return Itinerary{}, nil
+		}
+
 		return Itinerary{}, err
 	}
 
-	legs, err := buildLegs([]byte(result.legs))
-	if err != nil {
-		return Itinerary{}, err
-	}
-
-	return Itinerary{
-		ID:   result.id,
-		Legs: legs,
-	}, nil
-}
-
-func buildLegs(legsByte []byte) ([]Leg, error) {
-	legs := []Leg{{}}
-	err := json.Unmarshal(legsByte, &legs)
-	if err != nil {
-		return []Leg{}, err
-	}
-
-	return legs, nil
+	return result.build()
 }

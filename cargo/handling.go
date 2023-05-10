@@ -1,8 +1,10 @@
 package cargo
 
 import (
+	"context"
 	"errors"
 
+	"github.com/mproyyan/grpc-shipping-microservice/db"
 	"github.com/mproyyan/grpc-shipping-microservice/location"
 	"github.com/mproyyan/grpc-shipping-microservice/voyage"
 )
@@ -67,4 +69,85 @@ func (h HandlingHistory) MostRecentlyCompletedEvent() (HandlingEvent, error) {
 	}
 
 	return h.HandlingEvents[len(h.HandlingEvents)-1], nil
+}
+
+type EventRepositoryContract interface {
+	Store(ctx context.Context, dbtx db.DBTX, e HandlingEvent) (HandlingEvent, error)
+	QueryHandlingHistory(ctx context.Context, dbtx db.DBTX, id TrackingID) (HandlingHistory, error)
+}
+
+type EventRepository struct {
+}
+
+type eventResult struct {
+	id           int64
+	trackingId   string
+	eventType    int
+	location     string
+	voyageNumber string
+}
+
+func (er EventRepository) Store(ctx context.Context, dbtx db.DBTX, e HandlingEvent) (HandlingEvent, error) {
+	query := `
+		INSERT INTO events (tracking_id, event_type, location, voyage_number)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id, tracking_id, event_type, location, voyage_number
+	`
+
+	var result eventResult
+	row := dbtx.QueryRowContext(ctx, query, e.TrackingID, e.Activity.Type, e.Activity.Location, e.Activity.VoyageNumber)
+	err := row.Scan(&result.id, &result.trackingId, &result.eventType, &result.location, &result.voyageNumber)
+	if err != nil {
+		return HandlingEvent{}, err
+	}
+
+	return HandlingEvent{
+		TrackingID: TrackingID(result.trackingId),
+		Activity: HandlingActivity{
+			Type:         HandlingEventType(result.eventType),
+			Location:     location.UNLocode(result.location),
+			VoyageNumber: voyage.Number(result.voyageNumber),
+		},
+	}, nil
+}
+
+func (er EventRepository) QueryHandlingHistory(ctx context.Context, dbtx db.DBTX, id TrackingID) (HandlingHistory, error) {
+	query := `
+		SELECT id, tracking_id, event_type, location, voyage_number FROM events
+		WHERE tracking_id = $1
+	`
+
+	var result eventResult
+	var handlinghistory HandlingHistory
+	row, err := dbtx.QueryContext(ctx, query, id)
+	if err != nil {
+		return handlinghistory, nil
+	}
+
+	for row.Next() {
+		err := row.Scan(
+			&result.id,
+			&result.trackingId,
+			&result.eventType,
+			&result.location,
+			&result.voyageNumber,
+		)
+
+		if err != nil {
+			return handlinghistory, err
+		}
+
+		event := HandlingEvent{
+			TrackingID: TrackingID(result.trackingId),
+			Activity: HandlingActivity{
+				Type:         HandlingEventType(result.eventType),
+				Location:     location.UNLocode(result.location),
+				VoyageNumber: voyage.Number(result.voyageNumber),
+			},
+		}
+
+		handlinghistory.HandlingEvents = append(handlinghistory.HandlingEvents, event)
+	}
+
+	return handlinghistory, nil
 }

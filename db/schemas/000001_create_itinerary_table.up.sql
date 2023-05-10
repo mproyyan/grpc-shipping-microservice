@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS itineraries (
+    id BIGSERIAL PRIMARY KEY,
+    legs JSON
+);

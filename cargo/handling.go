@@ -2,6 +2,7 @@ package cargo
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/mproyyan/grpc-shipping-microservice/db"
@@ -21,6 +22,7 @@ type HandlingActivity struct {
 // HandlingEvent is used to register the event when, for instance, a cargo is
 // unloaded from a carrier at a some location at a given time.
 type HandlingEvent struct {
+	ID         int64
 	TrackingID TrackingID
 	Activity   HandlingActivity
 }
@@ -80,11 +82,26 @@ type EventRepository struct {
 }
 
 type eventResult struct {
-	id           int64
-	trackingId   string
-	eventType    int
-	location     string
-	voyageNumber string
+	id           sql.NullInt64
+	trackingId   sql.NullString
+	eventType    sql.NullInt32
+	location     sql.NullString
+	voyageNumber sql.NullString
+}
+
+func (er eventResult) build() HandlingEvent {
+	if !er.id.Valid {
+		return HandlingEvent{}
+	}
+
+	return HandlingEvent{
+		TrackingID: TrackingID(er.trackingId.String),
+		Activity: HandlingActivity{
+			Type:         HandlingEventType(er.eventType.Int32),
+			Location:     location.UNLocode(er.location.String),
+			VoyageNumber: voyage.Number(er.voyageNumber.String),
+		},
+	}
 }
 
 func (er EventRepository) Store(ctx context.Context, dbtx db.DBTX, e HandlingEvent) (HandlingEvent, error) {
@@ -101,14 +118,7 @@ func (er EventRepository) Store(ctx context.Context, dbtx db.DBTX, e HandlingEve
 		return HandlingEvent{}, err
 	}
 
-	return HandlingEvent{
-		TrackingID: TrackingID(result.trackingId),
-		Activity: HandlingActivity{
-			Type:         HandlingEventType(result.eventType),
-			Location:     location.UNLocode(result.location),
-			VoyageNumber: voyage.Number(result.voyageNumber),
-		},
-	}, nil
+	return result.build(), nil
 }
 
 func (er EventRepository) QueryHandlingHistory(ctx context.Context, dbtx db.DBTX, id TrackingID) (HandlingHistory, error) {
@@ -137,15 +147,7 @@ func (er EventRepository) QueryHandlingHistory(ctx context.Context, dbtx db.DBTX
 			return handlinghistory, err
 		}
 
-		event := HandlingEvent{
-			TrackingID: TrackingID(result.trackingId),
-			Activity: HandlingActivity{
-				Type:         HandlingEventType(result.eventType),
-				Location:     location.UNLocode(result.location),
-				VoyageNumber: voyage.Number(result.voyageNumber),
-			},
-		}
-
+		event := result.build()
 		handlinghistory.HandlingEvents = append(handlinghistory.HandlingEvents, event)
 	}
 

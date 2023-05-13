@@ -12,6 +12,7 @@ import (
 var (
 	dbTest        *sql.DB
 	itineraryTest ItineraryRepositoryContract
+	deliveryTest  DeliveryRepositoryContract
 )
 
 func TestMain(m *testing.M) {
@@ -26,6 +27,7 @@ func TestMain(m *testing.M) {
 	dbTest, _ = db.NewPostgreSQL(env).Connect()
 
 	itineraryTest = ItineraryRepository{}
+	deliveryTest = DeliveryRepository{}
 
 	os.Exit(m.Run())
 }

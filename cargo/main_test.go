@@ -14,6 +14,7 @@ var (
 	itineraryTest ItineraryRepositoryContract
 	deliveryTest  DeliveryRepositoryContract
 	cargoTest     CargoRepositoryContract
+	eventTest     EventRepositoryContract
 )
 
 func TestMain(m *testing.M) {
@@ -30,6 +31,7 @@ func TestMain(m *testing.M) {
 	itineraryTest = ItineraryRepository{}
 	deliveryTest = DeliveryRepository{}
 	cargoTest = CargoRepository{ItineraryRepository: itineraryTest, DeliveryRepository: deliveryTest}
+	eventTest = EventRepository{}
 
 	os.Exit(m.Run())
 }

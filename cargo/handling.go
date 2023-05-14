@@ -107,7 +107,7 @@ func (er eventResult) build() HandlingEvent {
 func (er EventRepository) Store(ctx context.Context, dbtx db.DBTX, e HandlingEvent) (HandlingEvent, error) {
 	query := `
 		INSERT INTO events (tracking_id, event_type, location, voyage_number)
-		VALUES ($1, $2, $3, $4, $5)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id, tracking_id, event_type, location, voyage_number
 	`
 

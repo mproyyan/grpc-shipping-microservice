@@ -69,6 +69,12 @@ func createNewItinerary(t *testing.T) Itinerary {
 	return i
 }
 
+func TestInsertItineraryWithNoLegs(t *testing.T) {
+	i, err := itineraryTest.Upsert(context.Background(), dbTest, Itinerary{})
+	require.NoError(t, err)
+	require.Equal(t, 0, len(i.Legs))
+}
+
 func TestFindItinerary(t *testing.T) {
 	it := createNewItinerary(t)
 	newIt, err := itineraryTest.Find(context.Background(), dbTest, it.ID)

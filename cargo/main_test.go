@@ -13,6 +13,7 @@ var (
 	dbTest        *sql.DB
 	itineraryTest ItineraryRepositoryContract
 	deliveryTest  DeliveryRepositoryContract
+	cargoTest     CargoRepositoryContract
 )
 
 func TestMain(m *testing.M) {
@@ -28,6 +29,7 @@ func TestMain(m *testing.M) {
 
 	itineraryTest = ItineraryRepository{}
 	deliveryTest = DeliveryRepository{}
+	cargoTest = CargoRepository{ItineraryRepository: itineraryTest, DeliveryRepository: deliveryTest}
 
 	os.Exit(m.Run())
 }

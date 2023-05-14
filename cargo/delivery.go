@@ -229,7 +229,7 @@ func (dr DeliveryRepository) Upsert(ctx context.Context, dbtx db.DBTX, delivery 
 		`
 
 		var eventType *int
-		if delivery.LastEvent.Activity.Type == NotHandled {
+		if delivery.LastEvent.Activity.Type != NotHandled {
 			eventType = (*int)(&delivery.LastEvent.Activity.Type)
 		}
 

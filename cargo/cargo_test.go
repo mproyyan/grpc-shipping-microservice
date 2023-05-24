@@ -55,19 +55,11 @@ func TestUpdateCargo(t *testing.T) {
 		},
 	}
 
-	// event := HandlingEvent{
-	// 	TrackingID: c.TrackingID,
-	// 	Activity: HandlingActivity{
-	// 		Type:     Receive,
-	// 		Location: location.UNLocode("IDJKT"),
-	// 	},
-	// }
-
+	event, _ := createNewEvent(t, c, Receive, string(c.RouteSpecification.Origin), "")
 	c.Itinerary = newItinerary
-	// TODO: create new delivery with new event
-	// newDel := newDelivery(event, c.Itinerary, c.RouteSpecification)
-	// newDel.ID = c.Delivery.ID
-	// c.Delivery = newDel
+	newDel := newDelivery(event, c.Itinerary, c.RouteSpecification)
+	newDel.ID = c.Delivery.ID
+	c.Delivery = newDel
 
 	nc, err := cargoTest.Upsert(context.Background(), dbTest, c)
 	require.NoError(t, err)
@@ -76,10 +68,8 @@ func TestUpdateCargo(t *testing.T) {
 	require.Equal(t, c.Delivery.ID, nc.Delivery.ID)
 	require.Equal(t, 2, len(nc.Itinerary.Legs))
 
-	// TODO: check LastEvent and NextExpectedActivity but to reach this point delivery
-	// requires event_id, so we need to create event before updating deliveries.last_event
-	// require.Equal(t, Receive, nc.Delivery.LastEvent.Activity.Type)
-	// require.Equal(t, Load, nc.Delivery.NextExpectedActivity.Type)
+	require.Equal(t, Receive, nc.Delivery.LastEvent.Activity.Type)
+	require.Equal(t, Load, nc.Delivery.NextExpectedActivity.Type)
 }
 
 func TestFindCargo(t *testing.T) {

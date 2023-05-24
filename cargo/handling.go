@@ -95,6 +95,7 @@ func (er eventResult) build() HandlingEvent {
 	}
 
 	return HandlingEvent{
+		ID:         er.id.Int64,
 		TrackingID: TrackingID(er.trackingId.String),
 		Activity: HandlingActivity{
 			Type:         HandlingEventType(er.eventType.Int32),

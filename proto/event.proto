@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package pb;
+option go_package = "github.com/mproyyan/grpc-shipping-microservice/pb";
+
+import "google/protobuf/timestamp.proto";
+
+message EventActivity {
+    int32 type = 1;
+    string location = 2;
+    string voyage_number = 3;
+}
+
+message Event {
+    int64 id = 1;
+    string tracking_id = 2;
+    EventActivity activity = 3;
+}

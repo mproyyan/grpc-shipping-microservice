@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package pb;
+option go_package = "github.com/mproyyan/grpc-shipping-microservice/pb";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "itinerary.proto";
+
+service Booking {
+    rpc BookNewCargo(BookNewCargoRequest) returns (BookNewCargoResponse) {}
+    rpc LoadCargo(LoadCargoRequest) returns (LoadCargoResponse) {}
+    rpc AssignCargoToRoute(AssignCargoToRouteRequest) returns (AssignCargoToRouteResponse) {}
+    rpc ChangeDestination(ChangeDestinationRequest) returns (ChangeDestinationResponse) {}
+    rpc Cargos(google.protobuf.Empty) returns (CargosResponse) {}
+}
+
+message BookNewCargoRequest {
+    string origin = 1;
+    string destination = 2;
+    google.protobuf.Timestamp deadline = 3;
+}
+
+message BookNewCargoResponse {
+    string tracking_id = 1;
+    string error = 2;
+}
+
+message LoadCargoRequest {
+    string tracking_id = 1;
+}
+
+message LoadCargoResponse {
+    BookingCargoModel cargo = 1;
+    string error = 2;
+}
+
+message AssignCargoToRouteRequest {
+    string tracking_id = 1;
+    Itinerary itinerary = 2;
+}
+
+message AssignCargoToRouteResponse {
+    string error = 1;
+}
+
+message ChangeDestinationRequest {
+    string tracking_id = 1;
+    string destination = 2;
+}
+
+message ChangeDestinationResponse {
+    string error = 1;
+}
+
+message CargosResponse {
+    repeated BookingCargoModel cargos = 1;
+}
+
+message BookingCargoModel {
+    google.protobuf.Timestamp arrival_deadline = 1;
+    string destination = 2;
+    repeated Leg legs = 3;
+    bool misrouted = 4;
+    string origin = 5;
+    bool routed = 6;
+    string tracking_id = 7;
+}

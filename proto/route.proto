@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package pb;
+option go_package = "github.com/mproyyan/grpc-shipping-microservice/pb";
+
+import "google/protobuf/timestamp.proto";
+
+message RouteSpecification {
+    string origin = 1;
+    string destianation = 2;
+    google.protobuf.Timestamp arrival_deadline = 3;
+}

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package pb;
+option go_package = "github.com/mproyyan/grpc-shipping-microservice/pb";
+
+import "google/protobuf/timestamp.proto";
+import "event.proto";
+import "itinerary.proto";
+import "route.proto";
+
+message Delivery {
+    int64 id = 1;
+    Itinerary itinerary = 2;
+    RouteSpecification route_specification = 3;
+    int32 routing_status = 4;
+    int32 transport_status = 5;
+    EventActivity next_expected_activity = 6;
+    Event last_event = 7;
+    string last_known_location = 8;
+    string current_voyage = 9;
+    google.protobuf.Timestamp eta = 10;
+    bool is_misdirected = 11;
+    bool is_unloaded_at_destination = 12;
+}

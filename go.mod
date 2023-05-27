@@ -3,6 +3,7 @@ module github.com/mproyyan/grpc-shipping-microservice
 go 1.19
 
 require (
+	github.com/go-kit/kit v0.12.0
 	github.com/golang/protobuf v1.5.2
 	github.com/lib/pq v1.10.9
 	github.com/pborman/uuid v1.2.1

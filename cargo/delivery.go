@@ -185,6 +185,10 @@ type DeliveryRepositoryContract interface {
 type DeliveryRepository struct {
 }
 
+func NewDeliveryRepository() DeliveryRepository {
+	return DeliveryRepository{}
+}
+
 type deliveryResult struct {
 	id              int64
 	origin          string

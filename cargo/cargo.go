@@ -72,6 +72,13 @@ type CargoRepository struct {
 	DeliveryRepository  DeliveryRepositoryContract
 }
 
+func NewCargoRepository(itineraryRepository ItineraryRepositoryContract, deliveryRepository DeliveryRepositoryContract) CargoRepository {
+	return CargoRepository{
+		ItineraryRepository: itineraryRepository,
+		DeliveryRepository:  deliveryRepository,
+	}
+}
+
 type cargoResult struct {
 	trackingID      string
 	origin          string

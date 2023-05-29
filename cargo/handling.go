@@ -81,6 +81,10 @@ type EventRepositoryContract interface {
 type EventRepository struct {
 }
 
+func NewEventRepository() EventRepository {
+	return EventRepository{}
+}
+
 type eventResult struct {
 	id           sql.NullInt64
 	trackingId   sql.NullString

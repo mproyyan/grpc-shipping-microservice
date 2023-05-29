@@ -105,6 +105,10 @@ type ItineraryRepositoryContract interface {
 type ItineraryRepository struct {
 }
 
+func NewItineraryRepository() ItineraryRepository {
+	return ItineraryRepository{}
+}
+
 type itineraryResult struct {
 	id   int64
 	legs string

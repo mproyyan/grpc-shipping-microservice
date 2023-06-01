@@ -26,14 +26,15 @@ type BookingService struct {
 	events cargo.EventRepositoryContract
 }
 
-func NewBookingService(cargos cargo.CargoRepositoryContract, events cargo.EventRepositoryContract) BookingService {
+func NewBookingService(db *sql.DB, cargos cargo.CargoRepositoryContract, events cargo.EventRepositoryContract) BookingService {
 	return BookingService{
+		db:     db,
 		cargos: cargos,
 		events: events,
 	}
 }
 
-func (bs *BookingService) BookNewCargo(ctx context.Context, origin location.UNLocode, destination location.UNLocode, deadline time.Time) (cargo.TrackingID, error) {
+func (bs BookingService) BookNewCargo(ctx context.Context, origin location.UNLocode, destination location.UNLocode, deadline time.Time) (cargo.TrackingID, error) {
 	if origin == "" || destination == "" || deadline.IsZero() {
 		return "", ErrInvalidArgument
 	}
@@ -54,7 +55,7 @@ func (bs *BookingService) BookNewCargo(ctx context.Context, origin location.UNLo
 	return c.TrackingID, nil
 }
 
-func (bs *BookingService) LoadCargo(ctx context.Context, id cargo.TrackingID) (Cargo, error) {
+func (bs BookingService) LoadCargo(ctx context.Context, id cargo.TrackingID) (Cargo, error) {
 	if id == "" {
 		return Cargo{}, ErrInvalidArgument
 	}
@@ -67,7 +68,7 @@ func (bs *BookingService) LoadCargo(ctx context.Context, id cargo.TrackingID) (C
 	return assemble(c, bs.events), nil
 }
 
-func (bs *BookingService) AssignCargoToRoute(ctx context.Context, id cargo.TrackingID, itinerary cargo.Itinerary) error {
+func (bs BookingService) AssignCargoToRoute(ctx context.Context, id cargo.TrackingID, itinerary cargo.Itinerary) error {
 	if id == "" || len(itinerary.Legs) == 0 {
 		return ErrInvalidArgument
 	}
@@ -75,6 +76,11 @@ func (bs *BookingService) AssignCargoToRoute(ctx context.Context, id cargo.Track
 	c, err := bs.cargos.Find(ctx, bs.db, id)
 	if err != nil {
 		return err
+	}
+
+	// check given itinerary id and cargo.itinerary.id
+	if c.Itinerary.ID != itinerary.ID {
+		return ErrInvalidArgument
 	}
 
 	c.AssignToRoute(itinerary)
@@ -86,7 +92,7 @@ func (bs *BookingService) AssignCargoToRoute(ctx context.Context, id cargo.Track
 	return nil
 }
 
-func (bs *BookingService) ChangeDestination(ctx context.Context, id cargo.TrackingID, destination location.UNLocode) error {
+func (bs BookingService) ChangeDestination(ctx context.Context, id cargo.TrackingID, destination location.UNLocode) error {
 	if id == "" || destination == "" {
 		return ErrInvalidArgument
 	}
@@ -110,7 +116,7 @@ func (bs *BookingService) ChangeDestination(ctx context.Context, id cargo.Tracki
 	return nil
 }
 
-func (bs *BookingService) Cargos(ctx context.Context) ([]Cargo, error) {
+func (bs BookingService) Cargos(ctx context.Context) ([]Cargo, error) {
 	var results []Cargo
 	cargos, err := bs.cargos.FindAll(ctx, bs.db)
 	if err != nil {

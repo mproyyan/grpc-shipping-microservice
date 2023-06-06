@@ -3,6 +3,7 @@ package cargo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -11,6 +12,8 @@ import (
 	"github.com/mproyyan/grpc-shipping-microservice/location"
 	"github.com/pborman/uuid"
 )
+
+var ErrUnknown = errors.New("unknown cargo")
 
 // TrackingID uniquely identifies a particular cargo.
 type TrackingID string

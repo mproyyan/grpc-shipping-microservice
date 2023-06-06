@@ -39,9 +39,9 @@ func NewBookingEndpoints(bs services.BookingServiceContract) Set {
 }
 
 type BookNewCargoRequest struct {
-	Origin      location.UNLocode
-	Destination location.UNLocode
-	Deadline    time.Time
+	Origin      location.UNLocode `json:"origin"`
+	Destination location.UNLocode `json:"destination"`
+	Deadline    time.Time         `json:"deadline"`
 }
 
 func (bncreq BookNewCargoRequest) Build(req *pb.BookNewCargoRequest) BookNewCargoRequest {
@@ -56,6 +56,8 @@ type BookNewCargoResponse struct {
 	TrackingID cargo.TrackingID `json:"tracking_id,omitempty"`
 	Error      error            `json:"error,omitempty"`
 }
+
+func (bncres BookNewCargoResponse) error() error { return bncres.Error }
 
 func (bncres BookNewCargoResponse) Protobuf() *pb.BookNewCargoResponse {
 	return &pb.BookNewCargoResponse{
@@ -80,7 +82,7 @@ func MakeBookNewCargoEndpoint(bs services.BookingServiceContract) endpoint.Endpo
 }
 
 type LoadCargoRequest struct {
-	TrackingID cargo.TrackingID
+	TrackingID cargo.TrackingID `json:"tracking_id"`
 }
 
 func (lcreq LoadCargoRequest) Build(req *pb.LoadCargoRequest) LoadCargoRequest {
@@ -93,6 +95,8 @@ type LoadCargoResponse struct {
 	Cargo services.Cargo `json:"cargo,omitempty"`
 	Error error          `json:"error,omitempty"`
 }
+
+func (res LoadCargoResponse) error() error { return res.Error }
 
 func (lcres LoadCargoResponse) Protobuf() *pb.LoadCargoResponse {
 	var legs []*pb.Leg
@@ -148,8 +152,8 @@ func newStatus(err error) Status {
 }
 
 type AssignCargoToRouteRequest struct {
-	TrackingID cargo.TrackingID
-	Itinerary  cargo.Itinerary
+	TrackingID cargo.TrackingID `json:"tracking_id"`
+	Itinerary  cargo.Itinerary  `json:"itinerary"`
 }
 
 func (r AssignCargoToRouteRequest) Build(req *pb.AssignCargoToRouteRequest) AssignCargoToRouteRequest {
@@ -180,6 +184,8 @@ type AssignCargoToRouteResponse struct {
 	Error  error  `json:"error,omitempty"`
 }
 
+func (res AssignCargoToRouteResponse) error() error { return res.Error }
+
 func (r AssignCargoToRouteResponse) Protobuf() *pb.AssignCargoToRouteResponse {
 	return &pb.AssignCargoToRouteResponse{
 		Error: err2str(r.Error),
@@ -202,8 +208,8 @@ func MakeAssignCargoToRouteEndpoint(bs services.BookingServiceContract) endpoint
 }
 
 type ChangeDestinationRequest struct {
-	TrackingID  cargo.TrackingID
-	Destination location.UNLocode
+	TrackingID  cargo.TrackingID  `json:"tracking_id"`
+	Destination location.UNLocode `json:"destination"`
 }
 
 func (r ChangeDestinationRequest) Build(req *pb.ChangeDestinationRequest) ChangeDestinationRequest {
@@ -217,6 +223,8 @@ type ChangeDestinationResponse struct {
 	Status Status `json:"status"`
 	Error  error  `json:"error,omitempty"`
 }
+
+func (res ChangeDestinationResponse) error() error { return res.Error }
 
 func (r ChangeDestinationResponse) Protobuf() *pb.ChangeDestinationResponse {
 	return &pb.ChangeDestinationResponse{
@@ -245,6 +253,8 @@ type ListCargosResponse struct {
 	Cargos []services.Cargo `json:"cargos"`
 	Error  error            `json:"error,omitempty"`
 }
+
+func (res ListCargosResponse) error() error { return res.Error }
 
 func (r ListCargosResponse) Protobuf() *pb.CargosResponse {
 	var cargos []*pb.BookingCargoModel

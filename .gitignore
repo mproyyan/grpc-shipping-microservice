@@ -1,2 +1,5 @@
 app.env
 Makefile
+consul
+consul-config.json
+dataconsul

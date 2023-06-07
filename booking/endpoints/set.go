@@ -38,6 +38,70 @@ func NewBookingEndpoints(bs services.BookingServiceContract) Set {
 	}
 }
 
+func (s Set) BookNewCargo(ctx context.Context, origin location.UNLocode, destination location.UNLocode, deadline time.Time) (cargo.TrackingID, error) {
+	resp, err := s.BookNewCargoEndpoint(ctx, BookNewCargoRequest{
+		Origin:      origin,
+		Destination: destination,
+		Deadline:    deadline,
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	res := resp.(BookNewCargoResponse)
+	return res.TrackingID, nil
+}
+
+func (s Set) LoadCargo(ctx context.Context, id cargo.TrackingID) (services.Cargo, error) {
+	resp, err := s.LoadCargoEndpoint(ctx, LoadCargoRequest{
+		TrackingID: id,
+	})
+
+	if err != nil {
+		return services.Cargo{}, err
+	}
+
+	res := resp.(LoadCargoResponse)
+	return res.Cargo, nil
+}
+
+func (s Set) AssignCargoToRoute(ctx context.Context, id cargo.TrackingID, itinerary cargo.Itinerary) error {
+	_, err := s.AssignCargoToRouteEndpoint(ctx, AssignCargoToRouteRequest{
+		TrackingID: id,
+		Itinerary:  itinerary,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s Set) ChangeDestination(ctx context.Context, id cargo.TrackingID, destination location.UNLocode) error {
+	_, err := s.ChangeDestinationEndpoint(ctx, ChangeDestinationRequest{
+		TrackingID:  id,
+		Destination: destination,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s Set) Cargos(ctx context.Context) ([]services.Cargo, error) {
+	resp, err := s.CargosEndpoint(ctx, ListCargosRequest{})
+	if err != nil {
+		return nil, err
+	}
+
+	res := resp.(ListCargosResponse)
+	return res.Cargos, nil
+}
+
 type BookNewCargoRequest struct {
 	Origin      location.UNLocode `json:"origin"`
 	Destination location.UNLocode `json:"destination"`

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/mproyyan/grpc-shipping-microservice/cargo"
@@ -72,14 +73,15 @@ func (bs BookingService) AssignCargoToRoute(ctx context.Context, id cargo.Tracki
 	if id == "" || len(itinerary.Legs) == 0 {
 		return ErrInvalidArgument
 	}
-
+	fmt.Println("service iti :", itinerary)
 	c, err := bs.cargos.Find(ctx, bs.db, id)
 	if err != nil {
 		return err
 	}
-
+	fmt.Println("cargo before assign :", c)
 	// check given itinerary id and cargo.itinerary.id
 	if c.Itinerary.ID != itinerary.ID {
+		fmt.Println("error id not same")
 		return ErrInvalidArgument
 	}
 
@@ -88,7 +90,7 @@ func (bs BookingService) AssignCargoToRoute(ctx context.Context, id cargo.Tracki
 	if err != nil {
 		return err
 	}
-
+	fmt.Println("cargo after assign :", c)
 	return nil
 }
 

@@ -3,6 +3,7 @@ package endpoints
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/go-kit/kit/endpoint"
@@ -67,6 +68,7 @@ func (s Set) LoadCargo(ctx context.Context, id cargo.TrackingID) (services.Cargo
 }
 
 func (s Set) AssignCargoToRoute(ctx context.Context, id cargo.TrackingID, itinerary cargo.Itinerary) error {
+	fmt.Println(itinerary)
 	_, err := s.AssignCargoToRouteEndpoint(ctx, AssignCargoToRouteRequest{
 		TrackingID: id,
 		Itinerary:  itinerary,
@@ -262,7 +264,7 @@ func MakeAssignCargoToRouteEndpoint(bs services.BookingServiceContract) endpoint
 		if !ok {
 			return nil, errors.New("failed to convert request to AssignCargoToRouteRequest")
 		}
-
+		fmt.Println("req.itineraty :", req.Itinerary)
 		err = bs.AssignCargoToRoute(ctx, req.TrackingID, req.Itinerary)
 		return AssignCargoToRouteResponse{
 			Status: newStatus(err),
@@ -366,13 +368,6 @@ func MakeListCargosEndpoint(bs services.BookingServiceContract) endpoint.Endpoin
 		}, nil
 	}
 }
-
-// func str2err(s string) error {
-// 	if s == "" {
-// 		return nil
-// 	}
-// 	return errors.New(s)
-// }
 
 func err2str(err error) string {
 	if err == nil {

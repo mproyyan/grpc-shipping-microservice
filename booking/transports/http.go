@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	ht "github.com/go-kit/kit/transport/http"
@@ -87,7 +88,7 @@ func decodeAssignCargoToRouteRequest(_ context.Context, r *http.Request) (interf
 	if err := json.NewDecoder(r.Body).Decode(&itinerary); err != nil {
 		return nil, err
 	}
-
+	fmt.Println(itinerary)
 	return endpoints.AssignCargoToRouteRequest{
 		TrackingID: cargo.TrackingID(id),
 		Itinerary:  itinerary,
@@ -122,6 +123,7 @@ type errorer interface {
 }
 
 func encodeGenericResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
+	fmt.Println(response)
 	if e, ok := response.(errorer); ok && e.error() != nil {
 		encodeError(ctx, e.error(), w)
 		return nil
